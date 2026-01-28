@@ -50,7 +50,7 @@
         <!-- Header -->
         <header class="text-center mb-8">
             <h1 class="text-4xl font-extrabold text-indigo-800 mb-2">Mundo Decimal</h1>
-            <p class="text-gray-600">Domina los números decimales</p>
+            <p class="text-gray-600">Domina los números decimales para 1º de la ESO</p>
             <div class="mt-4 flex justify-center items-center gap-6 bg-white p-4 rounded-2xl shadow-sm inline-flex">
                 <div class="text-center">
                     <span class="block text-xs uppercase font-bold text-gray-400">Puntos</span>
@@ -108,9 +108,9 @@
                         </div>
                     </div>
                     <div class="mt-8 p-6 bg-indigo-50 rounded-2xl w-full">
-                        <p class="font-bold text-indigo-800 mb-2">Reto: ¿Qué cifra ocupa el lugar de las centésimas en <span id="pos-target">12.894</span>?</p>
+                        <p class="font-bold text-indigo-800 mb-2">Reto: Escribe la cifra que ocupa el lugar de <span id="pos-target">las centésimas</span> en el número <span id="pos-number-display" class="text-indigo-600 text-lg">12.894</span></p>
                         <div class="flex gap-4">
-                            <input type="number" id="pos-answer" class="flex-1 p-3 rounded-xl border-2 border-indigo-200 focus:border-indigo-500 outline-none" placeholder="?">
+                            <input type="number" id="pos-answer" class="flex-1 p-3 rounded-xl border-2 border-indigo-200 focus:border-indigo-500 outline-none text-center font-bold text-xl" placeholder="?">
                             <button onclick="checkPosicion()" class="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-700 transition">Comprobar</button>
                         </div>
                     </div>
@@ -262,7 +262,7 @@
             n.innerText = msg;
             n.className = `fixed bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-full font-bold text-white shadow-2xl z-50 feedback-pop ${success ? 'bg-green-500' : 'bg-red-500'}`;
             n.classList.remove('hidden');
-            setTimeout(() => n.classList.add('hidden'), 2000);
+            setTimeout(() => n.classList.add('hidden'), 2500); // Increased time slightly for readability
         }
 
         function updateScore(points) {
@@ -289,13 +289,22 @@
         // --- MODULE GENERATORS & LOGIC ---
 
         function genPosicion() {
+            // Generate a random number with 3 decimals
             const n = (Math.random() * 100).toFixed(3);
             state.posicion.num = n;
-            document.getElementById('pos-target').innerText = n;
-            const places = ["decenas", "unidades", "décimas", "centésimas", "milésimas"];
-            state.posicion.targetPlace = places[Math.floor(Math.random() * places.length)];
             
-            // Textual hint for the task
+            // Determine available places based on the number size
+            const parts = n.split('.');
+            const intPart = parts[0];
+            const availablePlaces = ["unidades", "décimas", "centésimas", "milésimas"];
+            
+            // Only ask for Tens if there are tens (number >= 10)
+            if (parseInt(intPart) >= 10) {
+                availablePlaces.push("decenas");
+            }
+
+            state.posicion.targetPlace = availablePlaces[Math.floor(Math.random() * availablePlaces.length)];
+            
             const labels = {
                 "decenas": "las DECENAS",
                 "unidades": "las UNIDADES",
@@ -303,28 +312,58 @@
                 "centésimas": "las CENTÉSIMAS",
                 "milésimas": "las MILÉSIMAS"
             };
-            document.querySelector('#posicion p.font-bold span').innerText = labels[state.posicion.targetPlace];
+            
+            // Update UI
+            document.getElementById('pos-number-display').innerText = n;
+            document.querySelector('#pos-target').innerText = labels[state.posicion.targetPlace];
+            
+            // Update main display example (just visualization, static for concept)
+            // Ideally this could dynamic too, but for now we keep the top example static or update it?
+            // Let's leave the top example as a static reference for teaching, focusing the challenge below.
+            
             document.getElementById('pos-answer').value = "";
+            document.getElementById('pos-answer').focus();
         }
 
         function checkPosicion() {
-            const ans = document.getElementById('pos-answer').value;
-            const numStr = parseFloat(state.posicion.num).toFixed(3).padStart(6, '0'); 
-            // format: 034.567
-            const map = {
-                "decenas": numStr[1],
-                "unidades": numStr[2],
-                "décimas": numStr[4],
-                "centésimas": numStr[5],
-                "milésimas": numStr[6]
-            };
+            const ans = document.getElementById('pos-answer').value.trim();
+            const nStr = state.posicion.num; // e.g., "12.894" or "5.420"
+            const parts = nStr.split('.');
+            const intPart = parts[0]; // "12" or "5"
+            const decPart = parts[1]; // "894" or "420"
 
-            if(ans === map[state.posicion.targetPlace]) {
-                notify("¡Excelente! Identificas muy bien las posiciones.");
+            let correctDigit = "";
+
+            // Robust logic to find the digit
+            switch(state.posicion.targetPlace) {
+                case "decenas":
+                    // Second digit from right in integer part
+                    correctDigit = intPart.length >= 2 ? intPart[intPart.length - 2] : "0";
+                    break;
+                case "unidades":
+                    // Last digit of integer part
+                    correctDigit = intPart[intPart.length - 1];
+                    break;
+                case "décimas":
+                    // First digit of decimal part
+                    correctDigit = decPart[0];
+                    break;
+                case "centésimas":
+                    // Second digit of decimal part
+                    correctDigit = decPart[1];
+                    break;
+                case "milésimas":
+                    // Third digit of decimal part
+                    correctDigit = decPart[2];
+                    break;
+            }
+
+            if(ans === correctDigit) {
+                notify("¡Excelente! Has identificado la cifra correcta.");
                 updateScore(10);
                 genPosicion();
             } else {
-                notify("Casi... ¡Piénsalo de nuevo!", false);
+                notify(`¡Ups! En ${state.posicion.num}, las ${state.posicion.targetPlace} son el número ${correctDigit}.`, false);
             }
         }
 
