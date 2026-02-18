@@ -1,515 +1,462 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mundo Decimal - 1º ESO</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
-        
-        body {
-            font-family: 'Outfit', sans-serif;
-            background-color: #f0f4f8;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .decimal-place {
-            transition: all 0.3s ease;
-        }
-
-        .decimal-place:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .feedback-pop {
-            animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        @keyframes pop {
-            0% { transform: scale(0.5); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Convertidor Decimal ↔ Fracción (1º ESO)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+    body { font-family: 'Outfit', sans-serif; background:#f0f4f8; }
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
+    .feedback-pop { animation: pop .25s ease-out; }
+    @keyframes pop { from{transform:scale(.96);opacity:.2} to{transform:scale(1);opacity:1} }
+    code.kbd { background:#eef2ff; padding:.15rem .4rem; border-radius:.5rem; font-weight:700; }
+  </style>
 </head>
 <body class="p-4 md:p-8">
+  <div class="max-w-4xl mx-auto">
+    <header class="text-center mb-8">
+      <h1 class="text-4xl font-extrabold text-indigo-800 mb-2">Decimal ↔ Fracción</h1>
+      <p class="text-gray-600">Guía paso a paso (exactos y periódicos)</p>
+      <div class="mt-4 inline-flex items-center gap-3 bg-white px-5 py-3 rounded-2xl shadow-sm">
+        <span class="text-xs uppercase font-bold text-gray-400">Formato periódico</span>
+        <span class="text-sm font-bold text-indigo-700">
+          <span class="mr-2"><code class="kbd">0.(3)</code></span>
+          <span class="mr-2"><code class="kbd">1.2(45)</code></span>
+          <span><code class="kbd">-0.1(6)</code></span>
+        </span>
+      </div>
+    </header>
 
-    <div class="max-w-5xl mx-auto">
-        <!-- Header -->
-        <header class="text-center mb-8">
-            <h1 class="text-4xl font-extrabold text-indigo-800 mb-2">Mundo Decimal</h1>
-            <p class="text-gray-600">Domina los números decimales para 1º de la ESO</p>
-            <div class="mt-4 flex justify-center items-center gap-6 bg-white p-4 rounded-2xl shadow-sm inline-flex">
-                <div class="text-center">
-                    <span class="block text-xs uppercase font-bold text-gray-400">Puntos</span>
-                    <span id="score" class="text-2xl font-bold text-indigo-600">0</span>
-                </div>
-                <div class="h-10 w-px bg-gray-200"></div>
-                <div class="text-center">
-                    <span class="block text-xs uppercase font-bold text-gray-400">Nivel</span>
-                    <span id="level-name" class="text-2xl font-bold text-indigo-600">Aprendiz</span>
-                </div>
-            </div>
-        </header>
+    <nav class="flex flex-wrap justify-center gap-2 mb-6">
+      <button id="btn-dec2frac" class="tab-btn px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold shadow-md"
+              onclick="showTab('dec2frac', this)">
+        Decimal → Fracción
+      </button>
+      <button id="btn-frac2dec" class="tab-btn px-4 py-2 bg-white text-indigo-600 rounded-lg font-semibold shadow-md hover:bg-indigo-50"
+              onclick="showTab('frac2dec', this)">
+        Fracción → Decimal
+      </button>
+    </nav>
 
-        <!-- Navigation Tabs -->
-        <nav class="flex flex-wrap justify-center gap-2 mb-8">
-            <button onclick="showTab('posicion')" class="tab-btn px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold shadow-md active-tab">1. Valor de Posición</button>
-            <button onclick="showTab('orden')" class="tab-btn px-4 py-2 bg-white text-indigo-600 rounded-lg font-semibold shadow-md hover:bg-indigo-50">2. Comparación</button>
-            <button onclick="showTab('redondeo')" class="tab-btn px-4 py-2 bg-white text-indigo-600 rounded-lg font-semibold shadow-md hover:bg-indigo-50">3. Redondeo</button>
-            <button onclick="showTab('operaciones')" class="tab-btn px-4 py-2 bg-white text-indigo-600 rounded-lg font-semibold shadow-md hover:bg-indigo-50">4. Operaciones</button>
-            <button onclick="showTab('potencias')" class="tab-btn px-4 py-2 bg-white text-indigo-600 rounded-lg font-semibold shadow-md hover:bg-indigo-50">5. Potencias de 10</button>
-            <button onclick="showTab('fracciones')" class="tab-btn px-4 py-2 bg-white text-indigo-600 rounded-lg font-semibold shadow-md hover:bg-indigo-50">6. Paso a Fracción</button>
-        </nav>
+    <main class="bg-white rounded-3xl shadow-xl p-6 md:p-8 min-h-[460px]">
 
-        <!-- Main Content Sections -->
-        <main class="bg-white rounded-3xl shadow-xl p-6 min-h-[500px]">
-            
-            <!-- 1. Valor de Posición -->
-            <section id="posicion" class="tab-content active">
-                <div class="text-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800">El Ábaco Decimal</h2>
-                    <p class="text-gray-500">Identifica cada parte del número decimal</p>
-                </div>
-                <div class="flex flex-col items-center">
-                    <div id="posicion-number" class="text-6xl font-black text-indigo-600 tracking-widest mb-8">34.567</div>
-                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 w-full">
-                        <div class="bg-blue-50 p-4 rounded-xl text-center border-b-4 border-blue-400">
-                            <span class="block text-sm font-bold text-blue-600">Decenas</span>
-                            <span class="text-3xl font-bold">3</span>
-                        </div>
-                        <div class="bg-blue-50 p-4 rounded-xl text-center border-b-4 border-blue-400">
-                            <span class="block text-sm font-bold text-blue-600">Unidades</span>
-                            <span class="text-3xl font-bold">4</span>
-                        </div>
-                        <div class="bg-yellow-50 p-4 rounded-xl text-center border-b-4 border-yellow-400">
-                            <span class="block text-sm font-bold text-yellow-600">Décimas</span>
-                            <span class="text-3xl font-bold">5</span>
-                        </div>
-                        <div class="bg-yellow-50 p-4 rounded-xl text-center border-b-4 border-yellow-400">
-                            <span class="block text-sm font-bold text-yellow-600">Centésimas</span>
-                            <span class="text-3xl font-bold">6</span>
-                        </div>
-                        <div class="bg-yellow-50 p-4 rounded-xl text-center border-b-4 border-yellow-400">
-                            <span class="block text-sm font-bold text-yellow-600">Milésimas</span>
-                            <span class="text-3xl font-bold">7</span>
-                        </div>
-                    </div>
-                    <div class="mt-8 p-6 bg-indigo-50 rounded-2xl w-full">
-                        <p class="font-bold text-indigo-800 mb-2">Reto: Escribe la cifra que ocupa el lugar de <span id="pos-target">las centésimas</span> en el número <span id="pos-number-display" class="text-indigo-600 text-lg">12.894</span></p>
-                        <div class="flex gap-4">
-                            <input type="number" id="pos-answer" class="flex-1 p-3 rounded-xl border-2 border-indigo-200 focus:border-indigo-500 outline-none text-center font-bold text-xl" placeholder="?">
-                            <button onclick="checkPosicion()" class="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-700 transition">Comprobar</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 2. Comparación y Orden -->
-            <section id="orden" class="tab-content">
-                <div class="text-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800">El Duelo de Decimales</h2>
-                    <p class="text-gray-500">¿Cuál es mayor? ¡Cuidado con la longitud de las cifras!</p>
-                </div>
-                <div class="flex flex-col items-center gap-8">
-                    <div class="flex items-center justify-around w-full max-w-md">
-                        <div id="comp-n1" class="text-4xl font-bold text-gray-700">5.42</div>
-                        <div class="flex flex-col gap-2">
-                            <button onclick="checkComp('>')" class="bg-white border-2 border-indigo-500 text-indigo-600 w-12 h-12 rounded-full font-bold text-2xl hover:bg-indigo-500 hover:text-white transition">></button>
-                            <button onclick="checkComp('<')" class="bg-white border-2 border-indigo-500 text-indigo-600 w-12 h-12 rounded-full font-bold text-2xl hover:bg-indigo-500 hover:text-white transition"><</button>
-                            <button onclick="checkComp('=')" class="bg-white border-2 border-indigo-500 text-indigo-600 w-12 h-12 rounded-full font-bold text-2xl hover:bg-indigo-500 hover:text-white transition">=</button>
-                        </div>
-                        <div id="comp-n2" class="text-4xl font-bold text-gray-700">5.409</div>
-                    </div>
-                    <div class="bg-yellow-50 p-4 rounded-xl text-sm text-yellow-800 max-w-md">
-                        <strong>💡 Truco:</strong> Añade ceros al final para que tengan la misma cantidad de cifras decimales antes de comparar. <br>Ejemplo: 5.420 es mayor que 5.409.
-                    </div>
-                </div>
-            </section>
-
-            <!-- 3. Redondeo -->
-            <section id="redondeo" class="tab-content">
-                <div class="text-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800">Precisión Máxima</h2>
-                    <p class="text-gray-500">Redondea a la unidad, décima o centésima</p>
-                </div>
-                <div class="max-w-md mx-auto space-y-6">
-                    <div class="bg-indigo-600 text-white p-8 rounded-3xl text-center shadow-lg">
-                        <span class="text-sm uppercase tracking-widest opacity-80">Número a redondear</span>
-                        <div id="round-num" class="text-5xl font-black mt-2">12.678</div>
-                    </div>
-                    <div class="space-y-4">
-                        <p class="font-bold text-center">Redondea a las <span id="round-target-unit" class="text-indigo-600">centésimas</span>:</p>
-                        <div class="flex gap-4">
-                            <input type="text" id="round-answer" class="flex-1 p-4 rounded-xl border-2 border-indigo-100 text-center text-2xl font-bold" placeholder="0.00">
-                            <button onclick="checkRedondeo()" class="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-700 transition">OK</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 4. Operaciones -->
-            <section id="operaciones" class="tab-content">
-                <div class="text-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800">Calculadora Mental</h2>
-                    <p class="text-gray-500">Suma, resta, multiplica y divide</p>
-                </div>
-                <div class="grid md:grid-cols-2 gap-8 items-center">
-                    <div class="bg-gray-50 p-6 rounded-3xl border-2 border-dashed border-gray-200">
-                        <div id="op-display" class="text-4xl font-mono font-bold text-center py-10">
-                            12.5 + 4.82
-                        </div>
-                    </div>
-                    <div class="space-y-4">
-                        <label class="block text-sm font-bold text-gray-600">TU RESULTADO:</label>
-                        <input type="text" id="op-answer" class="w-full p-4 rounded-2xl border-2 border-indigo-200 text-3xl font-bold" placeholder="0.00">
-                        <button onclick="checkOperacion()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-xl hover:bg-indigo-700 shadow-lg transition">Verificar Operación</button>
-                        <div class="text-xs text-gray-400 italic">Nota: Usa el punto (.) para los decimales.</div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 5. Potencias de 10 -->
-            <section id="potencias" class="tab-content">
-                <div class="text-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800">Mueve la Coma</h2>
-                    <p class="text-gray-500">Multiplicar y dividir por 10, 100, 1000...</p>
-                </div>
-                <div class="max-w-xl mx-auto space-y-8">
-                    <div class="flex justify-center items-center gap-6">
-                        <div id="pow-n1" class="text-4xl font-bold">4.5</div>
-                        <div id="pow-op" class="text-3xl font-bold text-red-500">×</div>
-                        <div id="pow-n2" class="text-4xl font-bold">100</div>
-                    </div>
-                    <div class="bg-indigo-50 p-8 rounded-3xl">
-                        <input type="text" id="pow-answer" class="w-full p-4 rounded-2xl text-center text-4xl font-bold border-2 border-indigo-200" placeholder="?">
-                        <button onclick="checkPotencia()" class="w-full mt-4 bg-indigo-600 text-white py-4 rounded-2xl font-bold text-xl hover:bg-indigo-700 transition">Lanzar!</button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 6. Fracciones -->
-            <section id="fracciones" class="tab-content">
-                <div class="text-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800">El Puente Fraccionario</h2>
-                    <p class="text-gray-500">Convierte decimales exactos en fracciones decimales</p>
-                </div>
-                <div class="flex flex-col items-center gap-8">
-                    <div id="frac-decimal" class="text-5xl font-black text-indigo-600">0.75</div>
-                    <div class="flex items-center gap-4">
-                        <div class="flex flex-col gap-2">
-                            <input type="number" id="frac-num" class="w-24 p-3 border-2 border-gray-300 rounded-lg text-center font-bold" placeholder="Num">
-                            <div class="h-1 bg-gray-800 w-full"></div>
-                            <input type="number" id="frac-den" class="w-24 p-3 border-2 border-gray-300 rounded-lg text-center font-bold" placeholder="Den">
-                        </div>
-                        <button onclick="checkFraccion()" class="bg-indigo-600 text-white px-8 py-10 rounded-2xl font-bold hover:bg-indigo-700 transition shadow-lg">Convertir</button>
-                    </div>
-                </div>
-            </section>
-
-        </main>
-
-        <!-- Notification area -->
-        <div id="notification" class="fixed bottom-10 left-1/2 -translate-x-1/2 hidden px-8 py-4 rounded-full font-bold text-white shadow-2xl z-50">
-            ¡Correcto! +10 puntos
+      <!-- DECIMAL -> FRAC -->
+      <section id="dec2frac" class="tab-content active">
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold text-gray-800">Decimal → Fracción</h2>
+          <p class="text-gray-500">Admite exactos y periódicos (con paréntesis).</p>
         </div>
+
+        <div class="grid md:grid-cols-2 gap-6 items-start">
+          <div class="bg-indigo-50 rounded-2xl p-5">
+            <label class="block text-sm font-bold text-indigo-900 mb-2">Escribe el decimal</label>
+            <input id="dec-input" type="text"
+                   class="w-full p-4 rounded-2xl border-2 border-indigo-200 text-xl font-bold outline-none focus:border-indigo-500"
+                   placeholder="Ej: 12.375   |   0.(3)   |   1.2(45)" />
+            <div class="flex gap-3 mt-4">
+              <button onclick="convertDecToFrac()"
+                      class="flex-1 bg-indigo-600 text-white py-3 rounded-2xl font-bold hover:bg-indigo-700 transition">
+                Convertir
+              </button>
+              <button onclick="exampleDec()"
+                      class="bg-white border-2 border-indigo-400 text-indigo-700 px-5 py-3 rounded-2xl font-bold hover:bg-indigo-100 transition">
+                Ejemplo
+              </button>
+            </div>
+
+            <div class="mt-4 text-xs text-indigo-900/80">
+              <p class="font-bold mb-1">Ejemplos rápidos:</p>
+              <ul class="list-disc pl-5 space-y-1">
+                <li><code class="kbd">0.75</code> → 3/4</li>
+                <li><code class="kbd">0.(6)</code> → 2/3</li>
+                <li><code class="kbd">1.2(45)</code> → 41/33</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 rounded-2xl p-5 border border-gray-200">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="text-lg font-extrabold text-gray-800">Resultado</h3>
+              <button onclick="copyText('dec2frac-out')"
+                      class="text-sm font-bold text-indigo-700 hover:text-indigo-900">
+                Copiar
+              </button>
+            </div>
+            <div id="dec2frac-out" class="mt-3 text-2xl font-black text-indigo-700">—</div>
+
+            <h4 class="mt-6 text-sm font-extrabold text-gray-700 uppercase tracking-wider">Paso a paso</h4>
+            <div id="dec2frac-steps" class="mt-2 text-sm text-gray-700 leading-relaxed whitespace-pre-line">Escribe un decimal y pulsa “Convertir”.</div>
+
+            <div id="dec2frac-error" class="hidden mt-4 px-4 py-3 rounded-xl bg-red-50 text-red-700 font-bold"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FRAC -> DEC -->
+      <section id="frac2dec" class="tab-content">
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold text-gray-800">Fracción → Decimal</h2>
+          <p class="text-gray-500">Te muestra si el resultado es exacto o periódico (con paréntesis).</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6 items-start">
+          <div class="bg-indigo-50 rounded-2xl p-5">
+            <label class="block text-sm font-bold text-indigo-900 mb-2">Escribe la fracción</label>
+
+            <div class="flex gap-3 items-center">
+              <input id="frac-num" type="text"
+                     class="w-full p-4 rounded-2xl border-2 border-indigo-200 text-xl font-bold outline-none focus:border-indigo-500 text-center"
+                     placeholder="Numerador (ej: 41)" />
+              <span class="text-3xl font-black text-indigo-700">/</span>
+              <input id="frac-den" type="text"
+                     class="w-full p-4 rounded-2xl border-2 border-indigo-200 text-xl font-bold outline-none focus:border-indigo-500 text-center"
+                     placeholder="Denominador (ej: 33)" />
+            </div>
+
+            <div class="flex gap-3 mt-4">
+              <button onclick="convertFracToDec()"
+                      class="flex-1 bg-indigo-600 text-white py-3 rounded-2xl font-bold hover:bg-indigo-700 transition">
+                Convertir
+              </button>
+              <button onclick="exampleFrac()"
+                      class="bg-white border-2 border-indigo-400 text-indigo-700 px-5 py-3 rounded-2xl font-bold hover:bg-indigo-100 transition">
+                Ejemplo
+              </button>
+            </div>
+
+            <div class="mt-4 text-xs text-indigo-900/80">
+              <p class="font-bold mb-1">Ejemplos rápidos:</p>
+              <ul class="list-disc pl-5 space-y-1">
+                <li>3/8 → 0.375</li>
+                <li>2/3 → 0.(6)</li>
+                <li>41/33 → 1.2(42)</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 rounded-2xl p-5 border border-gray-200">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="text-lg font-extrabold text-gray-800">Resultado</h3>
+              <button onclick="copyText('frac2dec-out')"
+                      class="text-sm font-bold text-indigo-700 hover:text-indigo-900">
+                Copiar
+              </button>
+            </div>
+            <div id="frac2dec-out" class="mt-3 text-2xl font-black text-indigo-700">—</div>
+
+            <h4 class="mt-6 text-sm font-extrabold text-gray-700 uppercase tracking-wider">Paso a paso</h4>
+            <div id="frac2dec-steps" class="mt-2 text-sm text-gray-700 leading-relaxed whitespace-pre-line">Escribe numerador y denominador, y pulsa “Convertir”.</div>
+
+            <div id="frac2dec-error" class="hidden mt-4 px-4 py-3 rounded-xl bg-red-50 text-red-700 font-bold"></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 hidden px-6 py-3 rounded-full font-bold text-white shadow-2xl z-50 feedback-pop bg-indigo-700">
+      Copiado ✅
     </div>
+  </div>
 
-    <script>
-        let score = 0;
-        let currentLevel = "Aprendiz";
-        const levels = ["Aprendiz", "Calculador", "Experto Decimal", "Maestro de las Comas"];
+<script>
+  // ---------- UI ----------
+  function showTab(tabId, btn){
+    document.querySelectorAll('.tab-content').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b=>{
+      b.classList.remove('bg-indigo-600','text-white');
+      b.classList.add('bg-white','text-indigo-600');
+    });
+    document.getElementById(tabId).classList.add('active');
+    btn.classList.remove('bg-white','text-indigo-600');
+    btn.classList.add('bg-indigo-600','text-white');
 
-        // State variables for problems
-        let state = {
-            posicion: { target: 0, num: 0 },
-            orden: { n1: 0, n2: 0 },
-            redondeo: { num: 0, targetType: "" },
-            operacion: { n1: 0, n2: 0, op: "", ans: 0 },
-            potencia: { n1: 0, n2: 0, op: "", ans: 0 },
-            fraccion: { decimal: 0, num: 0, den: 0 }
-        };
+    // limpia errores
+    hideError('dec2frac-error');
+    hideError('frac2dec-error');
+  }
 
-        function showTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => {
-                b.classList.remove('bg-indigo-600', 'text-white');
-                b.classList.add('bg-white', 'text-indigo-600');
-            });
+  function toast(msg="Copiado ✅"){
+    const t=document.getElementById('toast');
+    t.textContent=msg;
+    t.classList.remove('hidden');
+    setTimeout(()=>t.classList.add('hidden'),1200);
+  }
 
-            document.getElementById(tabId).classList.add('active');
-            const btn = event.target;
-            btn.classList.remove('bg-white', 'text-indigo-600');
-            btn.classList.add('bg-indigo-600', 'text-white');
+  async function copyText(id){
+    const el=document.getElementById(id);
+    const txt=el.textContent.trim();
+    if(!txt || txt==="—") return;
+    try { await navigator.clipboard.writeText(txt); toast(); }
+    catch { toast("No se pudo copiar"); }
+  }
 
-            initModule(tabId);
-        }
+  function showError(id,msg){
+    const e=document.getElementById(id);
+    e.textContent=msg;
+    e.classList.remove('hidden');
+  }
+  function hideError(id){
+    const e=document.getElementById(id);
+    e.classList.add('hidden');
+    e.textContent="";
+  }
 
-        function notify(msg, success = true) {
-            const n = document.getElementById('notification');
-            n.innerText = msg;
-            n.className = `fixed bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-full font-bold text-white shadow-2xl z-50 feedback-pop ${success ? 'bg-green-500' : 'bg-red-500'}`;
-            n.classList.remove('hidden');
-            setTimeout(() => n.classList.add('hidden'), 2500); // Increased time slightly for readability
-        }
+  function exampleDec(){
+    const ex=["0.75","0.(6)","1.2(45)","12.375","-0.1(6)"];
+    document.getElementById('dec-input').value = ex[Math.floor(Math.random()*ex.length)];
+    convertDecToFrac();
+  }
+  function exampleFrac(){
+    const ex=[[3,8],[2,3],[41,33],[7,20],[-5,6]];
+    const [a,b]=ex[Math.floor(Math.random()*ex.length)];
+    document.getElementById('frac-num').value=a;
+    document.getElementById('frac-den').value=b;
+    convertFracToDec();
+  }
 
-        function updateScore(points) {
-            score += points;
-            document.getElementById('score').innerText = score;
-            
-            let levelIdx = Math.floor(score / 100);
-            if(levelIdx >= levels.length) levelIdx = levels.length - 1;
-            currentLevel = levels[levelIdx];
-            document.getElementById('level-name').innerText = currentLevel;
-        }
+  // ---------- Math helpers ----------
+  function gcd(a,b){
+    a=Math.abs(a); b=Math.abs(b);
+    while(b!==0){ const t=a%b; a=b; b=t; }
+    return a;
+  }
+  function reduceFrac(num, den){
+    if(den===0) throw new Error("Denominador 0 no está permitido.");
+    if(num===0) return {num:0, den:1};
+    const sign = (num*den<0) ? -1 : 1;
+    num=Math.abs(num); den=Math.abs(den);
+    const g=gcd(num,den);
+    return {num: sign*(num/g), den: den/g};
+  }
 
-        function initModule(id) {
-            switch(id) {
-                case 'posicion': genPosicion(); break;
-                case 'orden': genOrden(); break;
-                case 'redondeo': genRedondeo(); break;
-                case 'operaciones': genOperacion(); break;
-                case 'potencias': genPotencia(); break;
-                case 'fracciones': genFraccion(); break;
-            }
-        }
+  // Parse decimal:
+  // - finite: 12.375
+  // - repeating: 1.2(45)  or 0.(3)
+  function parseDecimalString(s){
+    s = (s||"").trim();
+    if(!s) throw new Error("Escribe un número decimal.");
+    s = s.replace(',', '.');
 
-        // --- MODULE GENERATORS & LOGIC ---
+    const m = s.match(/^([+-])?(\d+)(?:\.(\d*))?(?:\((\d+)\))?$/);
+    if(!m) throw new Error("Formato no válido. Usa por ejemplo 12.375 o 1.2(45) o 0.(3).");
 
-        function genPosicion() {
-            // Generate a random number with 3 decimals
-            const n = (Math.random() * 100).toFixed(3);
-            state.posicion.num = n;
-            
-            // Determine available places based on the number size
-            const parts = n.split('.');
-            const intPart = parts[0];
-            const availablePlaces = ["unidades", "décimas", "centésimas", "milésimas"];
-            
-            // Only ask for Tens if there are tens (number >= 10)
-            if (parseInt(intPart) >= 10) {
-                availablePlaces.push("decenas");
-            }
+    const sign = m[1]==="-" ? -1 : 1;
+    const intPart = m[2];                 // "1"
+    const nonRep = (m[3] ?? "");          // "2"
+    const rep = (m[4] ?? "");             // "45" or ""
 
-            state.posicion.targetPlace = availablePlaces[Math.floor(Math.random() * availablePlaces.length)];
-            
-            const labels = {
-                "decenas": "las DECENAS",
-                "unidades": "las UNIDADES",
-                "décimas": "las DÉCIMAS",
-                "centésimas": "las CENTÉSIMAS",
-                "milésimas": "las MILÉSIMAS"
-            };
-            
-            // Update UI
-            document.getElementById('pos-number-display').innerText = n;
-            document.querySelector('#pos-target').innerText = labels[state.posicion.targetPlace];
-            
-            // Update main display example (just visualization, static for concept)
-            // Ideally this could dynamic too, but for now we keep the top example static or update it?
-            // Let's leave the top example as a static reference for teaching, focusing the challenge below.
-            
-            document.getElementById('pos-answer').value = "";
-            document.getElementById('pos-answer').focus();
-        }
+    // if there's parentheses but empty -> invalid already by regex
+    return {sign, intPart, nonRep, rep};
+  }
 
-        function checkPosicion() {
-            const ans = document.getElementById('pos-answer').value.trim();
-            const nStr = state.posicion.num; // e.g., "12.894" or "5.420"
-            const parts = nStr.split('.');
-            const intPart = parts[0]; // "12" or "5"
-            const decPart = parts[1]; // "894" or "420"
+  // Decimal -> fraction
+  function decimalToFractionSteps(s){
+    const {sign, intPart, nonRep, rep} = parseDecimalString(s);
 
-            let correctDigit = "";
+    const I = BigInt(intPart);
+    const m = nonRep.length;
+    const k = rep.length;
 
-            // Robust logic to find the digit
-            switch(state.posicion.targetPlace) {
-                case "decenas":
-                    // Second digit from right in integer part
-                    correctDigit = intPart.length >= 2 ? intPart[intPart.length - 2] : "0";
-                    break;
-                case "unidades":
-                    // Last digit of integer part
-                    correctDigit = intPart[intPart.length - 1];
-                    break;
-                case "décimas":
-                    // First digit of decimal part
-                    correctDigit = decPart[0];
-                    break;
-                case "centésimas":
-                    // Second digit of decimal part
-                    correctDigit = decPart[1];
-                    break;
-                case "milésimas":
-                    // Third digit of decimal part
-                    correctDigit = decPart[2];
-                    break;
-            }
+    let steps = [];
+    steps.push(`Entrada: ${s.replace(',', '.')}`);
 
-            if(ans === correctDigit) {
-                notify("¡Excelente! Has identificado la cifra correcta.");
-                updateScore(10);
-                genPosicion();
-            } else {
-                notify(`¡Ups! En ${state.posicion.num}, las ${state.posicion.targetPlace} son el número ${correctDigit}.`, false);
-            }
-        }
+    if(k===0){
+      // exact decimal
+      const A = BigInt(nonRep || "0");
+      const tenPowM = BigInt(10) ** BigInt(m);
 
-        function genOrden() {
-            const base = (Math.random() * 10).toFixed(1);
-            state.orden.n1 = (parseFloat(base) + Math.random() * 0.1).toFixed(3);
-            state.orden.n2 = (parseFloat(base) + Math.random() * 0.1).toFixed(2);
-            document.getElementById('comp-n1').innerText = state.orden.n1;
-            document.getElementById('comp-n2').innerText = state.orden.n2;
-        }
+      // value = sign * (I + A/10^m) = sign * (I*10^m + A)/10^m
+      const num = (I * tenPowM + A) * BigInt(sign);
+      const den = tenPowM;
 
-        function checkComp(symbol) {
-            const v1 = parseFloat(state.orden.n1);
-            const v2 = parseFloat(state.orden.n2);
-            let correct = false;
-            if(symbol === '>') correct = v1 > v2;
-            if(symbol === '<') correct = v1 < v2;
-            if(symbol === '=') correct = v1 === v2;
+      steps.push(`Decimal exacto (sin período).`);
+      steps.push(`Se escribe como fracción con denominador 10^${m}:`);
+      steps.push(`  ${intPart}.${nonRep || "0"} = (${intPart}·10^${m} + ${nonRep || "0"}) / 10^${m}`);
+      return {num, den, steps};
+    }
 
-            if(correct) {
-                notify("¡Correcto! Dominas el orden decimal.");
-                updateScore(15);
-                genOrden();
-            } else {
-                notify("Error. Recuerda igualar el número de cifras con ceros.", false);
-            }
-        }
+    // repeating decimal
+    // x = I + nonRep/10^m + rep / (10^m (10^k - 1))
+    const A = BigInt(nonRep || "0");
+    const B = BigInt(rep);
 
-        function genRedondeo() {
-            state.redondeo.num = (Math.random() * 100).toFixed(3);
-            const types = ["unidades", "décimas", "centésimas"];
-            state.redondeo.targetType = types[Math.floor(Math.random() * types.length)];
-            document.getElementById('round-num').innerText = state.redondeo.num;
-            document.getElementById('round-target-unit').innerText = state.redondeo.targetType;
-            document.getElementById('round-answer').value = "";
-        }
+    const tenPowM = BigInt(10) ** BigInt(m);
+    const tenPowK = BigInt(10) ** BigInt(k);
 
-        function checkRedondeo() {
-            const val = parseFloat(state.redondeo.num);
-            let expected;
-            if(state.redondeo.targetType === "unidades") expected = Math.round(val);
-            if(state.redondeo.targetType === "décimas") expected = Math.round(val * 10) / 10;
-            if(state.redondeo.targetType === "centésimas") expected = Math.round(val * 100) / 100;
+    const repDen = (tenPowK - BigInt(1));                 // 10^k - 1
+    // numerator for fractional part: A*(10^k - 1) + B
+    const fracNum = A * repDen + B;
+    const fracDen = tenPowM * repDen;
 
-            const userAns = parseFloat(document.getElementById('round-answer').value.replace(',', '.'));
-            if(userAns === expected) {
-                notify("¡Perfecto! Tienes mucha precisión.");
-                updateScore(20);
-                genRedondeo();
-            } else {
-                notify(`Incorrecto. El resultado era ${expected}`, false);
-            }
-        }
+    // total num/den: I + fracNum/fracDen = (I*fracDen + fracNum)/fracDen
+    const num = (I * fracDen + fracNum) * BigInt(sign);
+    const den = fracDen;
 
-        function genOperacion() {
-            const ops = ['+', '-', '*', '/'];
-            const op = ops[Math.floor(Math.random() * ops.length)];
-            let n1, n2, ans;
+    steps.push(`Decimal periódico detectado: parte no periódica = "${nonRep || "∅"}", período = "${rep}".`);
+    steps.push(`Idea: eliminar la coma y luego restar para borrar el período.`);
+    steps.push(`Método directo con potencias de 10:`);
+    steps.push(`  Sea x = ${intPart}.${nonRep}(${rep})`);
+    steps.push(`  m = ${m} (cifras no periódicas), k = ${k} (cifras del período)`);
+    steps.push(`  Fracción de la parte decimal = (A·(10^k−1) + B) / (10^m·(10^k−1))`);
+    steps.push(`  donde A = ${nonRep || "0"} y B = ${rep}`);
+    steps.push(`  Entonces x = I + esa fracción, con I = ${intPart}`);
 
-            if(op === '+') {
-                n1 = (Math.random() * 50).toFixed(2);
-                n2 = (Math.random() * 50).toFixed(2);
-                ans = parseFloat(n1) + parseFloat(n2);
-            } else if(op === '-') {
-                n1 = (Math.random() * 100 + 50).toFixed(2);
-                n2 = (Math.random() * 50).toFixed(2);
-                ans = parseFloat(n1) - parseFloat(n2);
-            } else if(op === '*') {
-                n1 = (Math.random() * 10).toFixed(1);
-                n2 = (Math.random() * 5).toFixed(1);
-                ans = parseFloat(n1) * parseFloat(n2);
-            } else {
-                // Division simple para 1º eso
-                n2 = [2, 4, 5, 10, 0.5, 0.1][Math.floor(Math.random() * 6)];
-                n1 = (n2 * (Math.floor(Math.random() * 20) + 1)).toFixed(1);
-                ans = parseFloat(n1) / n2;
-            }
+    return {num, den, steps};
+  }
 
-            state.operacion = { n1, n2, op, ans: ans.toFixed(2) };
-            document.getElementById('op-display').innerText = `${n1} ${op === '*' ? '×' : op === '/' ? '÷' : op} ${n2}`;
-            document.getElementById('op-answer').value = "";
-        }
+  function bigIntToReducedString(numBI, denBI){
+    // reduce using BigInt gcd
+    let n = numBI;
+    let d = denBI;
+    if(d===BigInt(0)) throw new Error("Denominador 0 no está permitido.");
 
-        function checkOperacion() {
-            const userAns = parseFloat(document.getElementById('op-answer').value.replace(',', '.')).toFixed(2);
-            if(userAns === state.operacion.ans) {
-                notify("¡Operación perfecta!");
-                updateScore(25);
-                genOperacion();
-            } else {
-                notify(`Casi, el resultado era ${state.operacion.ans}`, false);
-            }
-        }
+    if(n===BigInt(0)) return {str:"0/1", n:BigInt(0), d:BigInt(1)};
 
-        function genPotencia() {
-            const n = (Math.random() * 500).toFixed(2);
-            const powers = [10, 100, 1000, 0.1, 0.01];
-            const p = powers[Math.floor(Math.random() * powers.length)];
-            state.potencia.n1 = n;
-            state.potencia.n2 = p;
-            state.potencia.op = '×';
-            state.potencia.ans = (n * p).toFixed(4);
+    const sign = (n<0n) ? -1n : 1n;
+    n = n*sign;
 
-            document.getElementById('pow-n1').innerText = n;
-            document.getElementById('pow-op').innerText = '×';
-            document.getElementById('pow-n2').innerText = p;
-            document.getElementById('pow-answer').value = "";
-        }
+    // gcd for BigInt
+    const bgcd = (a,b)=>{ a=a<0n?-a:a; b=b<0n?-b:b; while(b!==0n){ const t=a%b; a=b; b=t; } return a; };
+    const g = bgcd(n,d);
+    n = n/g; d = d/g;
+    n = n*sign;
 
-        function checkPotencia() {
-            const userAns = parseFloat(document.getElementById('pow-answer').value.replace(',', '.'));
-            const correct = Math.abs(userAns - parseFloat(state.potencia.ans)) < 0.0001;
-            if(correct) {
-                notify("¡Esa coma vuela! Muy bien.");
-                updateScore(15);
-                genPotencia();
-            } else {
-                notify("Revisa hacia dónde mueves la coma.", false);
-            }
-        }
+    return {str:`${n.toString()}/${d.toString()}`, n, d};
+  }
 
-        function genFraccion() {
-            const decimals = [0.5, 0.25, 0.75, 0.2, 0.4, 0.8, 0.125, 1.5, 0.1, 0.01];
-            const d = decimals[Math.floor(Math.random() * decimals.length)];
-            state.fraccion.decimal = d;
-            document.getElementById('frac-decimal').innerText = d;
-            document.getElementById('frac-num').value = "";
-            document.getElementById('frac-den').value = "";
-        }
+  function convertDecToFrac(){
+    hideError('dec2frac-error');
+    const input = document.getElementById('dec-input').value;
 
-        function checkFraccion() {
-            const n = parseInt(document.getElementById('frac-num').value);
-            const d = parseInt(document.getElementById('frac-den').value);
-            if(n / d === state.fraccion.decimal) {
-                notify("¡Fracción equivalente encontrada!");
-                updateScore(30);
-                genFraccion();
-            } else {
-                notify("Esa fracción no da el decimal pedido.", false);
-            }
-        }
+    try{
+      const {num, den, steps} = decimalToFractionSteps(input);
+      const red = bigIntToReducedString(num, den);
 
-        // Initialize first module
-        window.onload = () => {
-            initModule('posicion');
-        };
-    </script>
+      document.getElementById('dec2frac-out').textContent = red.str;
+
+      // Add reduction step if changed
+      let extra = [];
+      extra.push(`\nSimplificación: se reduce dividiendo entre el MCD del numerador y el denominador.`);
+      extra.push(`Resultado final: ${red.str}`);
+
+      document.getElementById('dec2frac-steps').textContent = steps.join('\n') + extra.join('\n');
+    }catch(err){
+      document.getElementById('dec2frac-out').textContent = "—";
+      document.getElementById('dec2frac-steps').textContent = "Revisa el formato e inténtalo de nuevo.";
+      showError('dec2frac-error', err.message || "Error.");
+    }
+  }
+
+  // Fraction -> decimal (detect repeating via remainders)
+  function fractionToDecimalWithPeriod(n, d){
+    if(d===0) throw new Error("Denominador 0 no está permitido.");
+
+    const sign = (n*d<0) ? "-" : "";
+    n = Math.abs(n); d = Math.abs(d);
+
+    const integerPart = Math.floor(n / d);
+    let rem = n % d;
+
+    if(rem===0){
+      return {dec: sign + integerPart.toString(), steps:[
+        `División: ${sign || ""}${n}/${d}`,
+        `Como el resto es 0, el decimal es exacto.`,
+        `Resultado: ${sign}${integerPart}`
+      ]};
+    }
+
+    // long division with remainder map
+    const seen = new Map(); // rem -> position
+    let digits = [];
+    let pos = 0;
+    while(rem !== 0 && !seen.has(rem)){
+      seen.set(rem, pos);
+      rem *= 10;
+      const digit = Math.floor(rem / d);
+      digits.push(digit);
+      rem = rem % d;
+      pos++;
+      // safety to avoid infinite in UI due to huge loops (still finite because repeats)
+      if(pos > 5000) throw new Error("Período demasiado largo para mostrar.");
+    }
+
+    if(rem===0){
+      // exact
+      const dec = sign + integerPart + "." + digits.join("");
+      return {
+        dec,
+        steps:[
+          `División: ${sign || ""}${n}/${d}`,
+          `El resto llega a 0 ⇒ decimal exacto.`,
+          `Parte entera: ${integerPart}`,
+          `Cifras decimales: ${digits.join("")}`,
+          `Resultado: ${dec}`
+        ]
+      };
+    }
+
+    // repeating
+    const start = seen.get(rem);
+    const nonRep = digits.slice(0, start).join("");
+    const rep = digits.slice(start).join("");
+    const dec = sign + integerPart + "." + (nonRep || "") + "(" + rep + ")";
+
+    return {
+      dec,
+      steps:[
+        `División: ${sign || ""}${n}/${d}`,
+        `Se guardan los restos: cuando un resto se repite, empieza el período.`,
+        `Parte entera: ${integerPart}`,
+        `Parte no periódica: ${nonRep || "∅"}`,
+        `Período: ${rep}`,
+        `Resultado: ${dec}`
+      ]
+    };
+  }
+
+  function convertFracToDec(){
+    hideError('frac2dec-error');
+    const aStr = (document.getElementById('frac-num').value || "").trim();
+    const bStr = (document.getElementById('frac-den').value || "").trim();
+
+    try{
+      if(!aStr || !bStr) throw new Error("Escribe numerador y denominador.");
+      if(!/^[+-]?\d+$/.test(aStr) || !/^[+-]?\d+$/.test(bStr))
+        throw new Error("Usa enteros (sin decimales) en numerador y denominador.");
+
+      let a = parseInt(aStr,10);
+      let b = parseInt(bStr,10);
+
+      // reduce fraction first
+      const red = reduceFrac(a,b);
+      a = red.num; b = red.den;
+
+      const out = fractionToDecimalWithPeriod(a,b);
+
+      document.getElementById('frac2dec-out').textContent = out.dec;
+
+      const stepBlock = [
+        `Fracción simplificada: ${a}/${b}`,
+        ...out.steps
+      ].join('\n');
+
+      document.getElementById('frac2dec-steps').textContent = stepBlock;
+
+    }catch(err){
+      document.getElementById('frac2dec-out').textContent = "—";
+      document.getElementById('frac2dec-steps').textContent = "Revisa los datos e inténtalo de nuevo.";
+      showError('frac2dec-error', err.message || "Error.");
+    }
+  }
+
+  // Init
+  window.onload = () => {
+    // ready
+  };
+</script>
 </body>
 </html>
